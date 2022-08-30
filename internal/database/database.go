@@ -5,7 +5,6 @@ import (
 	_ "github.com/lib/pq"
 )
 import "fmt"
-import "time"
 
 type infoDB struct {
 	Host     string
@@ -24,13 +23,13 @@ func NewPostgresDB() (*DBStruct, error) {
 	infoConnection := infoDB{
 		Host:     "localhost",
 		Port:     "5437",
-		Username: "postgres",
-		Password: "qwerty",
-		DBName:   "postgres",
+		Username: "ilya",
+		Password: "4774",
+		DBName:   "wb",
 	}
-	dbase, err := sql.Open("postgres", fmt.Sprintf("host=%s port=%s user=%s dbname=%s password=%s sslmode=%s", infoConnection.Host, infoConnection.Port, infoConnection.Username, infoConnection.Password, infoConnection.DBName, "disable"))
+	//dbase, err := sql.Open("postgres", fmt.Sprintf("host=%s port=%s user=%s dbname=%s password=%s sslmode=%s", infoConnection.Host, infoConnection.Port, infoConnection.Username, infoConnection.Password, infoConnection.DBName, "disable"))
 
-	dbase.SetConnMaxLifetime(time.Minute)
+	dbase, err := sql.Open("postgres", fmt.Sprintf("host=%s user=%s password=%s dbname=%s sslmode=%s", infoConnection.Host, infoConnection.Username, infoConnection.Password, infoConnection.DBName, "disable"))
 
 	if err != nil {
 		return nil, err

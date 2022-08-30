@@ -10,6 +10,8 @@
     Подключение к БД:
         psql -U postgres
 
+        psql -h localhost ilya -d wb
+
 создание таблицы
     postgres=# create table db(
     uid text,
