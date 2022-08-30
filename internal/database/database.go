@@ -12,6 +12,7 @@ type infoDB struct {
 	Username string
 	Password string
 	DBName   string
+	SSLMode  string
 }
 
 type DBStruct struct {
@@ -22,14 +23,16 @@ type DBStruct struct {
 func NewPostgresDB() (*DBStruct, error) {
 	infoConnection := infoDB{
 		Host:     "localhost",
-		Port:     "5437",
+		Port:     "5432",
 		Username: "ilya",
 		Password: "4774",
 		DBName:   "wb",
+		SSLMode:  "disable",
 	}
-	//dbase, err := sql.Open("postgres", fmt.Sprintf("host=%s port=%s user=%s dbname=%s password=%s sslmode=%s", infoConnection.Host, infoConnection.Port, infoConnection.Username, infoConnection.Password, infoConnection.DBName, "disable"))
 
-	dbase, err := sql.Open("postgres", fmt.Sprintf("host=%s user=%s password=%s dbname=%s sslmode=%s", infoConnection.Host, infoConnection.Username, infoConnection.Password, infoConnection.DBName, "disable"))
+	dbase, err := sql.Open("postgres", fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%s", infoConnection.Host, infoConnection.Port, infoConnection.Username, infoConnection.Password, infoConnection.DBName, infoConnection.SSLMode))
+
+	//dbase.SetConnMaxLifetime(time.Minute)
 
 	if err != nil {
 		return nil, err
@@ -39,6 +42,11 @@ func NewPostgresDB() (*DBStruct, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	//создание таблицы если она не создана
+	dbase.QueryRow("CREATE TABLE IF NOT EXISTS orders(" +
+		"uid text," +
+		"data json);")
 
 	return &DBStruct{
 		Arr: NewCounters(),
