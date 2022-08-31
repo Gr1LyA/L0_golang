@@ -3,6 +3,7 @@ package database
 import (
 	"database/sql"
 	_ "github.com/lib/pq"
+	"log"
 )
 import "fmt"
 
@@ -30,6 +31,7 @@ func NewPostgresDB() (*DBStruct, error) {
 		SSLMode:  "disable",
 	}
 
+	arr := NewCounters()
 	dbase, err := sql.Open("postgres", fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%s", infoConnection.Host, infoConnection.Port, infoConnection.Username, infoConnection.Password, infoConnection.DBName, infoConnection.SSLMode))
 
 	//dbase.SetConnMaxLifetime(time.Minute)
@@ -48,8 +50,26 @@ func NewPostgresDB() (*DBStruct, error) {
 		"uid text," +
 		"data json);")
 
+	//выгрузка из дб в кеш
+	rows, err := dbase.Query("select * from orders")
+	if err != nil {
+		log.Println(err)
+	}
+
+	for rows.Next() {
+		var uid, data string
+
+		err := rows.Scan(&uid, &data)
+		if err != nil {
+			log.Println(err)
+		}
+		arr.Store(uid, data)
+	}
+
+	rows.Close()
+
 	return &DBStruct{
-		Arr: NewCounters(),
+		Arr: arr,
 		Db:  dbase,
 	}, nil
 }
