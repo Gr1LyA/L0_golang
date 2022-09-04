@@ -13,7 +13,7 @@ type DBStruct struct {
 	Db  *sql.DB
 }
 
-func NewPostgresDB() (*DBStruct, error) {
+func PostgresDB() (*DBStruct, error) {
 	//чтение конфига для подключени к БД
 	viper.AddConfigPath("config")
 	viper.SetConfigName("config")
@@ -21,9 +21,6 @@ func NewPostgresDB() (*DBStruct, error) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	//dbase, err := sql.Open("postgres", fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%s", infoConnection.Host, infoConnection.Port, infoConnection.Username, infoConnection.Password, infoConnection.DBName, infoConnection.SSLMode))
-
-	//dbase.SetConnMaxLifetime(time.Minute)
 
 	dbase, err := sql.Open("postgres", fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%s", viper.Get("postgres.host"), viper.Get("postgres.port"), viper.Get("postgres.username"), viper.Get("postgres.password"), viper.Get("postgres.dbname"), viper.Get("postgres.sslmode")))
 

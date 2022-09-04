@@ -13,7 +13,7 @@ import (
 func main() {
 	//создание бд и получение структуры
 	log.Println("подключение к бд")
-	db, err := NewPostgresDB()
+	db, err := PostgresDB()
 	if err != nil {
 		log.Fatal(err)
 	}
