@@ -2,13 +2,8 @@ package database
 
 import "sync"
 
-//type tableDB struct {
-//	uidOrder string
-//	jsonData string
-//}
-
 type mapMutex struct {
-	mx sync.Mutex
+	mx sync.RWMutex
 	m  map[string]string
 }
 
@@ -19,9 +14,9 @@ func NewCounters() *mapMutex {
 }
 
 func (c *mapMutex) Load(key string) (string, bool) {
-	c.mx.Lock()
+	c.mx.RLock()
 	val, ok := c.m[key]
-	c.mx.Unlock()
+	c.mx.RUnlock()
 	return val, ok
 }
 

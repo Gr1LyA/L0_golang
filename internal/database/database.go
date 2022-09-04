@@ -3,18 +3,10 @@ package database
 import (
 	"database/sql"
 	_ "github.com/lib/pq"
+	"github.com/spf13/viper"
 	"log"
 )
 import "fmt"
-
-type infoDB struct {
-	Host     string
-	Port     string
-	Username string
-	Password string
-	DBName   string
-	SSLMode  string
-}
 
 type DBStruct struct {
 	Arr *mapMutex
@@ -22,19 +14,18 @@ type DBStruct struct {
 }
 
 func NewPostgresDB() (*DBStruct, error) {
-	infoConnection := infoDB{
-		Host:     "localhost",
-		Port:     "5432",
-		Username: "ilya",
-		Password: "4774",
-		DBName:   "wb",
-		SSLMode:  "disable",
+	//чтение конфига для подключени к БД
+	viper.AddConfigPath("config")
+	viper.SetConfigName("config")
+	err := viper.ReadInConfig()
+	if err != nil {
+		log.Fatal(err)
 	}
-
-	arr := NewCounters()
-	dbase, err := sql.Open("postgres", fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%s", infoConnection.Host, infoConnection.Port, infoConnection.Username, infoConnection.Password, infoConnection.DBName, infoConnection.SSLMode))
+	//dbase, err := sql.Open("postgres", fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%s", infoConnection.Host, infoConnection.Port, infoConnection.Username, infoConnection.Password, infoConnection.DBName, infoConnection.SSLMode))
 
 	//dbase.SetConnMaxLifetime(time.Minute)
+
+	dbase, err := sql.Open("postgres", fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%s", viper.Get("postgres.host"), viper.Get("postgres.port"), viper.Get("postgres.username"), viper.Get("postgres.password"), viper.Get("postgres.dbname"), viper.Get("postgres.sslmode")))
 
 	if err != nil {
 		return nil, err
@@ -47,7 +38,7 @@ func NewPostgresDB() (*DBStruct, error) {
 
 	//создание таблицы если она не создана
 	dbase.QueryRow("CREATE TABLE IF NOT EXISTS orders(" +
-		"uid text," +
+		"uid text unique," +
 		"data json);")
 
 	//выгрузка из дб в кеш
@@ -55,6 +46,8 @@ func NewPostgresDB() (*DBStruct, error) {
 	if err != nil {
 		log.Println(err)
 	}
+
+	arr := NewCounters()
 
 	for rows.Next() {
 		var uid, data string
