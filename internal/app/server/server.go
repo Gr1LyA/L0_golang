@@ -1,53 +1,68 @@
 package server
 
 import (
-	"io"
+	"fmt"
 	"log"
 	"net/http"
-	"fmt"
+	"io/ioutil"
 
-	"github.com/spf13/viper"
 	"github.com/Gr1LyA/L0_golang/internal/app/storage"
 )
 
-type Server struct {
-	store *storage.Storage
+type serverStorage interface {
+	Open(string) error
+	Load(string) (string, bool)
+	Store(string, string) error
+	Close()
 }
 
-func New() *Server {
-	return &Server{}
+type server struct {
+	store serverStorage
 }
 
-func (s *Server) Start() error {
+func NewServer() *server {
+	return &server{}
+}
+
+func (s *server) startSrv(dbUrl string) error {
 	log.Println("start")
 
-	if err := s.configureStore(); err != nil {
+	if err := s.configureStore(dbUrl); err != nil {
 		return err
 	}
 
-	http.HandleFunc("/", s.midHandle())
-	return http.ListenAndServe("localhost:8080", nil)
+	http.HandleFunc("/", s.midHandle("static/index.html"))
+	return nil
 }
 
-func (s *Server) midHandle() http.HandlerFunc {
+func (s *server) midHandle(pagePath string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		io.WriteString(w, "alo")
-		// http.ServeFile(w, r, "static/index.html")
+			switch r.Method {
+			case "GET":
+				http.ServeFile(w, r, pagePath)
+			case "POST":
+				if err := r.ParseForm(); err != nil {
+					fmt.Fprintln(w, err)
+				}
+
+				if v, ok := s.store.Load(r.FormValue("uid")); ok {
+					fmt.Fprint(w, v)
+				} else if b, err := ioutil.ReadAll(r.Body) ; err == nil{ 
+					if v, ok := s.store.Load(string(b)); ok {
+						fmt.Fprint(w, v)
+					}
+				} else {
+					fmt.Fprint(w, "sorry, uid not found!")
+				}
+
+				// fmt.Fprintln(w, r.Response)
+			default:
+				fmt.Fprintln(w, "only get and post requests")
+		}
 	}
 }
 
-func (s *Server) configureStore() error {
-	viper.AddConfigPath("configs")
-	viper.SetConfigName("config")
-	err := viper.ReadInConfig()
-	if err != nil {
-		return err
-	}
-
-	dbUrl := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%s", 
-		viper.Get("postgres.host"), viper.Get("postgres.port"), viper.Get("postgres.username"), 
-		viper.Get("postgres.password"), viper.Get("postgres.dbname"), viper.Get("postgres.sslmode"))
-
+func (s *server) configureStore(dbUrl string) error {
 	st := storage.New()
 
 	if err := st.Open(dbUrl); err != nil {

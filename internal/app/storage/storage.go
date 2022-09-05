@@ -7,16 +7,16 @@ import (
 	"github.com/Gr1LyA/L0_golang/internal/app/model"
 )
 
-type Storage struct {
+type storage struct {
 	db *sql.DB
 	orders *model.MapMutex
 }
 
-func New() *Storage {
-	return &Storage{}
+func New() *storage {
+	return &storage{}
 }
 
-func (s *Storage) Open(dbUrl string) error {
+func (s *storage) Open(dbUrl string) error {
 
 	
 	db, err := sql.Open("postgres", dbUrl)
@@ -39,7 +39,7 @@ func (s *Storage) Open(dbUrl string) error {
 	return nil
 }
 
-func (s *Storage) loadCache() error {
+func (s *storage) loadCache() error {
 	err := s.db.QueryRow(
 		"CREATE TABLE IF NOT EXISTS orders(" +
 		"uid text unique," +
@@ -73,12 +73,12 @@ func (s *Storage) loadCache() error {
 	return nil
 }
 
-func (s *Storage) Load(key string) (string, bool){
+func (s *storage) Load(key string) (string, bool){
 	val, ok := s.orders.Load(key)
 	return val, ok
 }
 
-func (s *Storage) Store(key string, value string) error {
+func (s *storage) Store(key string, value string) error {
 	if err := s.db.QueryRow("insert into orders (uid, data) values ($1, $2)", key, value).Err(); err != nil {
 		return err
 	}
@@ -86,6 +86,6 @@ func (s *Storage) Store(key string, value string) error {
 	return nil
 }
 
-func (s *Storage) Close() {
+func (s *storage) Close() {
 	s.db.Close()
 }

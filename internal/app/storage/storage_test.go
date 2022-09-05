@@ -4,7 +4,6 @@ import (
 	"testing"
 	"github.com/spf13/viper"
 	"fmt"
-
 )
 
 var (

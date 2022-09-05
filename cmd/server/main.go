@@ -6,8 +6,7 @@ import (
 )
 
 func main() {
-	s := server.New()
-	if err := s.Start(); err != nil {
+	if err := server.Start(); err != nil {
 		log.Fatal(err)
 	}
 }

@@ -6,4 +6,7 @@ build:
 test:
 		go test -v -race -timeout 30s ./...
 
+clean:
+		rm server
+
 .DEFAULT_GOAL := build
