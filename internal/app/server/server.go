@@ -9,15 +9,8 @@ import (
 	"github.com/Gr1LyA/L0_golang/internal/app/storage"
 )
 
-type serverStorage interface {
-	Open(string) error
-	Load(string) (string, bool)
-	Store(string, string) error
-	Close()
-}
-
 type server struct {
-	store serverStorage
+	store storage.ServerStorage
 }
 
 func NewServer() *server {
@@ -44,7 +37,6 @@ func (s *server) midHandle(pagePath string) http.HandlerFunc {
 				if err := r.ParseForm(); err != nil {
 					fmt.Fprintln(w, err)
 				}
-
 				if v, ok := s.store.Load(r.FormValue("uid")); ok {
 					fmt.Fprint(w, v)
 				} else if b, err := ioutil.ReadAll(r.Body) ; err == nil{ 

@@ -7,6 +7,13 @@ import (
 	"github.com/Gr1LyA/L0_golang/internal/app/model"
 )
 
+type ServerStorage interface {
+	Open(string) error
+	Load(string) (string, bool)
+	Store(string, string) error
+	Close()
+}
+
 type storage struct {
 	db *sql.DB
 	orders *model.MapMutex
