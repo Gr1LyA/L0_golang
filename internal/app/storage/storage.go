@@ -55,7 +55,6 @@ func (s *storage) loadCache() error {
 		return err
 	}
 
-
 	rows, err := s.db.Query("select * from orders")
 	if err != nil {
 		return err

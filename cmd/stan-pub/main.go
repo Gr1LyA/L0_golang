@@ -22,7 +22,7 @@ import (
 
 
 func main() {
-	sc, err := stan.Connect("test-cluster", "stan-sub")
+	sc, err := stan.Connect("test-cluster", "stan-pub")
 	if err != nil {
 		log.Fatal(err)
 	}

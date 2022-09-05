@@ -2,15 +2,16 @@ package server
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 	"io/ioutil"
 
 	"github.com/Gr1LyA/L0_golang/internal/app/storage"
+	"github.com/Gr1LyA/L0_golang/internal/app/stan"
 )
 
 type server struct {
-	store storage.ServerStorage
+	store	storage.ServerStorage
+	st		stan.StanStruct
 }
 
 func NewServer() *server {
@@ -18,9 +19,15 @@ func NewServer() *server {
 }
 
 func (s *server) startSrv(dbUrl string) error {
-	log.Println("start")
+	fmt.Println("start")
 
+	// DBase
 	if err := s.configureStore(dbUrl); err != nil {
+		return err
+	}
+
+	// Nats-streaming
+	if err := s.st.ConnectAndSubscribe(s.store); err != nil {
 		return err
 	}
 
@@ -62,4 +69,9 @@ func (s *server) configureStore(dbUrl string) error {
 	s.store = st
 
 	return nil
+}
+
+func (s *server) Close() {
+	s.st.Close()
+	s.store.Close()
 }

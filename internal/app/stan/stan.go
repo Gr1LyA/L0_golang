@@ -8,16 +8,12 @@ import (
 	"fmt"
 )
 
-type stanStruct struct {
+type StanStruct struct {
 	sub stan.Subscription
 	sc  stan.Conn
 }
 
-func New() *stanStruct {
-	return &stanStruct{}
-}
-
-func (st *stanStruct) connectAndSubscribe(store storage.ServerStorage) error {
+func (st *StanStruct) ConnectAndSubscribe(store storage.ServerStorage) error {
 	sc, err := stan.Connect("test-cluster", "stan-sub")
 	if err != nil {
 		return err
@@ -67,7 +63,7 @@ func parserMsg(m *stan.Msg, store storage.ServerStorage) {
 	fmt.Println("add: ", jsn.OrderUID)
 }
 
-func (st *stanStruct) close(){
+func (st *StanStruct) Close(){
 	st.sub.Close()
 	st.sc.Close()
 }
