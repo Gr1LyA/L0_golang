@@ -42,12 +42,10 @@ func (s *server) midHandle(pagePath string) http.HandlerFunc {
 				} else if b, err := ioutil.ReadAll(r.Body) ; err == nil{ 
 					if v, ok := s.store.Load(string(b)); ok {
 						fmt.Fprint(w, v)
+					} else {
+						fmt.Fprint(w, "sorry, uid not found!")
 					}
-				} else {
-					fmt.Fprint(w, "sorry, uid not found!")
-				}
-
-				// fmt.Fprintln(w, r.Response)
+				} 
 			default:
 				fmt.Fprintln(w, "only get and post requests")
 		}
