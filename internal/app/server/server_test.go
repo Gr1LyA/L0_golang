@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/Gr1LyA/L0_golang/internal/app/storage"
 )
 
 var (
@@ -37,7 +38,7 @@ func (s *testStorage) Close() {
 	
 }
 
-func NewTestStorage() serverStorage {
+func NewTestStorage() storage.ServerStorage {
 	return &testStorage{
 		orders: make(map[string]string),
 	}
