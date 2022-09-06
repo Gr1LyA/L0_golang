@@ -88,7 +88,7 @@ func (s *storage) Load(key string) (string, bool){
 }
 
 func (s *storage) Store(key string, value string) error {
-	if !s.validOrders(value) {
+	if !validOrders(value) {
 		return nil
 	}
 
@@ -102,7 +102,7 @@ func (s *storage) Store(key string, value string) error {
 	return nil
 }
 
-func (s *storage) validOrders(value string) bool {
+func validOrders(value string) bool {
 	var jsonData model.ModelOrder
 	
 	if !json.Valid([]byte(value)) {
