@@ -30,9 +30,9 @@ func Start() error {
 
 	go func() {
 		<-signalChan
-		log.Printf("\nClosing connections...\n")
+		log.Printf("Closing connections...\n\n")
 		srv.Close()
-		log.Printf("\nClosed\n\n")
+		log.Printf("Closed\n\n")
 		srvRun.Shutdown(context.TODO())
 		close(cleanupDone)
 	}()

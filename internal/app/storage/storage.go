@@ -2,9 +2,12 @@ package storage
 
 import (
 	"database/sql"
+	"log"
+	"encoding/json"
 
 	_ "github.com/lib/pq"
 	"github.com/Gr1LyA/L0_golang/internal/app/model"
+	"github.com/go-playground/validator/v10"
 )
 
 type ServerStorage interface {
@@ -85,11 +88,41 @@ func (s *storage) Load(key string) (string, bool){
 }
 
 func (s *storage) Store(key string, value string) error {
+	if !s.validOrders(value) {
+		return nil
+	}
+
 	if err := s.db.QueryRow("insert into orders (uid, data) values ($1, $2)", key, value).Err(); err != nil {
 		return err
 	}
+
 	s.orders.Store(key, value)
+	log.Println("add: ", key)
+
 	return nil
+}
+
+func (s *storage) validOrders(value string) bool {
+	var jsonData model.ModelOrder
+	
+	if !json.Valid([]byte(value)) {
+		log.Println("invalid json")
+		return false
+	}
+
+	if err := json.Unmarshal([]byte (value), &jsonData); err != nil {
+		log.Println(err)
+		return false
+	}
+
+	validate := validator.New()
+	err := validate.Struct(jsonData)
+	if err != nil {
+		log.Println(err)
+		return false
+	}
+
+	return true
 }
 
 func (s *storage) Close() {

@@ -3,7 +3,6 @@ package stan
 import (
 	"github.com/nats-io/stan.go"
 	"github.com/Gr1LyA/L0_golang/internal/app/storage"
-	"github.com/Gr1LyA/L0_golang/internal/app/model"
 	"encoding/json"
 	"fmt"
 )
@@ -34,33 +33,18 @@ func (st *StanStruct) ConnectAndSubscribe(store storage.ServerStorage) error {
 }
 
 func parserMsg(m *stan.Msg, store storage.ServerStorage) {
-	var jsn model.ModelJson
-
-	//проверка json на валидность
-	if !json.Valid(m.Data) {
-		fmt.Println("invalid json")
-		return
+	var jsn struct {
+		OrderUID string `json:"order_uid"`
 	}
-
-	//распаковка json в структуру
-	err := json.Unmarshal(m.Data, &jsn)
-	if err != nil {
+	
+	if err := json.Unmarshal(m.Data, &jsn); err != nil {
 		fmt.Println(err)
 		return
 	}
 
-	if jsn.OrderUID == "" {
-		fmt.Println("invalid uid")
-		return
-	}
-
-	err = store.Store(jsn.OrderUID, string(m.Data))
-	if err != nil {
+	if err := store.Store(jsn.OrderUID, string(m.Data)); err != nil {
 		fmt.Println(err)
-		return
 	}
-
-	fmt.Println("add: ", jsn.OrderUID)
 }
 
 func (st *StanStruct) Close() {
