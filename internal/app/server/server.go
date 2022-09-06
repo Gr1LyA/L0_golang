@@ -2,6 +2,7 @@ package server
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"io/ioutil"
 
@@ -19,15 +20,18 @@ func NewServer() *server {
 }
 
 func (s *server) startSrv(dbUrl string) error {
-	fmt.Println("start")
+	log.Println("start")
 
 	// DBase
+	log.Println("database:open and load cache")
 	if err := s.configureStore(dbUrl); err != nil {
 		return err
 	}
 
 	// Nats-streaming
+	log.Println("nats-streaming: connect and subscribe")
 	if err := s.st.ConnectAndSubscribe(s.store); err != nil {
+		s.store.Close()
 		return err
 	}
 
@@ -36,7 +40,7 @@ func (s *server) startSrv(dbUrl string) error {
 }
 
 func (s *server) midHandle(pagePath string) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
+	return	func(w http.ResponseWriter, r *http.Request) {
 			switch r.Method {
 			case "GET":
 				http.ServeFile(w, r, pagePath)

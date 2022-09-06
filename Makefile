@@ -1,3 +1,5 @@
+TESTS = $(addprefix github.com/Gr1LyA/L0_golang/internal/app/, server storage stan)
+
 .PHONY: build
 build:
 		go build -v ./cmd/service
@@ -7,7 +9,7 @@ pub:
 
 .PHONY: test
 test:
-		go test -v -race -timeout 30s ./...
+		go test -v -timeout 30s $(TESTS)
 
 clean:
 		rm service stan-pub

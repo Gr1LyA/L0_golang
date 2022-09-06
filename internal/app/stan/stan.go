@@ -63,7 +63,7 @@ func parserMsg(m *stan.Msg, store storage.ServerStorage) {
 	fmt.Println("add: ", jsn.OrderUID)
 }
 
-func (st *StanStruct) Close(){
+func (st *StanStruct) Close() {
 	st.sub.Close()
 	st.sc.Close()
 }

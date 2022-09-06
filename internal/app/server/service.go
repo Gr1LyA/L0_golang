@@ -3,6 +3,10 @@ package server
 import (
 	"fmt"
 	"net/http"
+	"os"
+	"os/signal"
+	"context"
+	"log"
 
 	"github.com/spf13/viper"
 )
@@ -16,8 +20,30 @@ func Start() error {
 	if err := srv.startSrv(databaseURL()); err != nil {
 		return err
 	}
-	
-	return http.ListenAndServe(":8080", nil)
+
+	srvRun := &http.Server{Addr: ":8080"}
+
+	signalChan := make(chan os.Signal)
+	cleanupDone := make(chan struct{})
+
+	signal.Notify(signalChan, os.Interrupt)
+
+	go func() {
+		<-signalChan
+		log.Printf("\nClosing connections...\n")
+		srv.Close()
+		log.Printf("\nClosed\n\n")
+		srvRun.Shutdown(context.TODO())
+		close(cleanupDone)
+	}()
+
+	if err := srvRun.ListenAndServe(); err != http.ErrServerClosed {
+		signalChan <- os.Interrupt
+		<- cleanupDone
+		return err
+	}
+	<- cleanupDone
+	return nil
 }
 
 func parseConfig() error {
