@@ -1,12 +1,12 @@
 package server
 
 import (
+	"context"
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 	"os/signal"
-	"context"
-	"log"
 
 	"github.com/spf13/viper"
 )
@@ -39,10 +39,10 @@ func Start() error {
 
 	if err := srvRun.ListenAndServe(); err != http.ErrServerClosed {
 		signalChan <- os.Interrupt
-		<- cleanupDone
+		<-cleanupDone
 		return err
 	}
-	<- cleanupDone
+	<-cleanupDone
 	return nil
 }
 
@@ -57,8 +57,8 @@ func parseConfig() error {
 }
 
 func databaseURL() string {
-	return fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%s", 
-		viper.Get("postgres.host"), viper.Get("postgres.port"), viper.Get("postgres.username"), 
+	return fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%s",
+		viper.Get("postgres.host"), viper.Get("postgres.port"), viper.Get("postgres.username"),
 		viper.Get("postgres.password"), viper.Get("postgres.dbname"), viper.Get("postgres.sslmode"),
 	)
 }

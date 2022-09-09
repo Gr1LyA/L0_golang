@@ -1,5 +1,5 @@
 package model
- 
+
 type testStorage struct {
 	orders map[string]string
 }

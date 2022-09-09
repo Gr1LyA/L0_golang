@@ -2,12 +2,12 @@ package storage
 
 import (
 	"database/sql"
-	"log"
 	"encoding/json"
+	"log"
 
-	_ "github.com/lib/pq"
 	"github.com/Gr1LyA/L0_golang/internal/app/model"
 	"github.com/go-playground/validator/v10"
+	_ "github.com/lib/pq"
 )
 
 type ServerStorage interface {
@@ -18,7 +18,7 @@ type ServerStorage interface {
 }
 
 type storage struct {
-	db *sql.DB
+	db     *sql.DB
 	orders *model.MapMutex
 }
 
@@ -28,14 +28,12 @@ func New() *storage {
 
 func (s *storage) Open(dbUrl string) error {
 
-	
 	db, err := sql.Open("postgres", dbUrl)
 
 	if err != nil {
 		return err
 	}
 
-	
 	if err = db.Ping(); err != nil {
 		return err
 	}
@@ -52,8 +50,8 @@ func (s *storage) Open(dbUrl string) error {
 func (s *storage) loadCache() error {
 	err := s.db.QueryRow(
 		"CREATE TABLE IF NOT EXISTS orders(" +
-		"uid text unique," +
-		"data json);").Err()
+			"uid text unique," +
+			"data json);").Err()
 	if err != nil {
 		return err
 	}
@@ -82,7 +80,7 @@ func (s *storage) loadCache() error {
 	return nil
 }
 
-func (s *storage) Load(key string) (string, bool){
+func (s *storage) Load(key string) (string, bool) {
 	val, ok := s.orders.Load(key)
 	return val, ok
 }
@@ -104,13 +102,13 @@ func (s *storage) Store(key string, value string) error {
 
 func validOrders(value string) bool {
 	var jsonData model.ModelOrder
-	
+
 	if !json.Valid([]byte(value)) {
 		log.Println("invalid json")
 		return false
 	}
 
-	if err := json.Unmarshal([]byte (value), &jsonData); err != nil {
+	if err := json.Unmarshal([]byte(value), &jsonData); err != nil {
 		log.Println(err)
 		return false
 	}

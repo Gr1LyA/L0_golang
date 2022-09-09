@@ -2,17 +2,17 @@ package server
 
 import (
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
-	"io/ioutil"
 
-	"github.com/Gr1LyA/L0_golang/internal/app/storage"
 	"github.com/Gr1LyA/L0_golang/internal/app/stan"
+	"github.com/Gr1LyA/L0_golang/internal/app/storage"
 )
 
 type server struct {
-	store	storage.ServerStorage
-	st		stan.StanStruct
+	store storage.ServerStorage
+	st    stan.StanStruct
 }
 
 func NewServer() *server {
@@ -40,25 +40,25 @@ func (s *server) startSrv(dbUrl string) error {
 }
 
 func (s *server) midHandle(pagePath string) http.HandlerFunc {
-	return	func(w http.ResponseWriter, r *http.Request) {
-			switch r.Method {
-			case "GET":
-				http.ServeFile(w, r, pagePath)
-			case "POST":
-				if err := r.ParseForm(); err != nil {
-					fmt.Fprintln(w, err)
-				}
-				if v, ok := s.store.Load(r.FormValue("uid")); ok {
+	return func(w http.ResponseWriter, r *http.Request) {
+		switch r.Method {
+		case "GET":
+			http.ServeFile(w, r, pagePath)
+		case "POST":
+			if err := r.ParseForm(); err != nil {
+				fmt.Fprintln(w, err)
+			}
+			if v, ok := s.store.Load(r.FormValue("uid")); ok {
+				fmt.Fprint(w, v)
+			} else if b, err := ioutil.ReadAll(r.Body); err == nil {
+				if v, ok := s.store.Load(string(b)); ok {
 					fmt.Fprint(w, v)
-				} else if b, err := ioutil.ReadAll(r.Body) ; err == nil{ 
-					if v, ok := s.store.Load(string(b)); ok {
-						fmt.Fprint(w, v)
-					} else {
-						fmt.Fprint(w, "sorry, uid not found!")
-					}
-				} 
-			default:
-				fmt.Fprintln(w, "only get and post requests")
+				} else {
+					fmt.Fprint(w, "sorry, uid not found!")
+				}
+			}
+		default:
+			fmt.Fprintln(w, "only get and post requests")
 		}
 	}
 }

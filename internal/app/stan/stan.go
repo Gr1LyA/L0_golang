@@ -1,10 +1,10 @@
 package stan
 
 import (
-	"github.com/nats-io/stan.go"
-	"github.com/Gr1LyA/L0_golang/internal/app/storage"
 	"encoding/json"
 	"fmt"
+	"github.com/Gr1LyA/L0_golang/internal/app/storage"
+	"github.com/nats-io/stan.go"
 )
 
 type StanStruct struct {
@@ -36,7 +36,7 @@ func parserMsg(m *stan.Msg, store storage.ServerStorage) {
 	var jsn struct {
 		OrderUID string `json:"order_uid"`
 	}
-	
+
 	if err := json.Unmarshal(m.Data, &jsn); err != nil {
 		fmt.Println(err)
 		return

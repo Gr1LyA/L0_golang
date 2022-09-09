@@ -1,12 +1,11 @@
 package main
 
 import (
-	"os"
 	"log"
+	"os"
 
 	"github.com/nats-io/stan.go"
 )
-
 
 func main() {
 	sc, err := stan.Connect("test-cluster", "stan-pub")
